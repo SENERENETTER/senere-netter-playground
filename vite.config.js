@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
-
 export default defineConfig({
+  base: '/senare-netter-playground/',
   server: {
     port: 3000,
     open: true,

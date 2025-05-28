@@ -10,9 +10,15 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "deploy": "npm run build && echo 'Build complete. Push to GitHub to deploy.'"
   },
-  "keywords": ["webdev", "playground", "senere-netter", "experimental"],
+  "keywords": [
+    "webdev",
+    "playground",
+    "senere-netter",
+    "experimental"
+  ],
   "author": "SENERENETTER",
   "license": "MIT",
   "devDependencies": {
