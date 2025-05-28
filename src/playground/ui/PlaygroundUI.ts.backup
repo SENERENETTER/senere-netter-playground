@@ -89,17 +89,6 @@ export class PlaygroundUI {
                         
                         <div class="card" style="margin-top: var(--spacing-lg);">
                             <h3>🎨 Theme Explorer</h3>
-                        
-                        <div class="card" style="margin-top: var(--spacing-lg);">
-                            <h3>🚀 Dynamic Import Demo</h3>
-                            <div id="dynamic-import-demo"></div>
-                        </div>
-                        
-                        <div class="card" style="margin-top: var(--spacing-lg);">
-                            <h3>🎨 Theme Explorer</h3>
-                            <div id="theme-explorer-demo"></div>
-                        </div>
-                        
                             <div id="theme-explorer-demo"></div>
                             <h3>Quick Tools</h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-top: var(--spacing-md);">
