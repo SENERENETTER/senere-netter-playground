@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+// Trigger new deployment - May 28, 2025
 export default defineConfig({
   base: '/senere-netter-playground/',
   server: {
