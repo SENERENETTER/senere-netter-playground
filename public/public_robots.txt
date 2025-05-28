@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://senere-netter-playground.netlify.app/sitemap.xml
