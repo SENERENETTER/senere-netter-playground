@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Last Cigarette | Mystical Visual Novel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #000;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .pixel-border {
+            border: 4px solid #4a4a4a;
+            box-shadow: 0 0 0 2px #2a2a2a, 0 0 0 6px #4a4a4a;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .typing {
+            border-right: 2px solid #e0e0e0;
+            animation: blink 0.75s step-end infinite;
+        }
+        
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: #e0e0e0 }
+        }
+        
+        .character {
+            transition: all 0.3s ease;
+        }
+        
+        .character.active {
+            filter: brightness(1.2);
+        }
+        
+        .character.inactive {
+            filter: brightness(0.6);
+        }
+        
+        .text-box {
+            background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+        }
+        
+        .name-tag {
+            background: linear-gradient(to right, #3a3a3a, #2a2a2a);
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: 2px 0 #00ffff;
+            clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+        }
+        
+        .blink {
+            animation: blink-bg 0.1s infinite;
+        }
+        
+        @keyframes blink-bg {
+            0% { background-color: #000; }
+            50% { background-color: #111; }
+            100% { background-color: #000; }
+        }
+    </style>
+</head>
+<body class="relative overflow-hidden blink">
+    <div class="scanlines"></div>
+    
+    <!-- Background -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1559128010-7c1ad6e1b8a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80'); filter: brightness(0.4) contrast(1.2) sepia(0.3);"></div>
+    
+    <!-- Characters -->
+    <div class="absolute inset-0 flex items-end justify-center space-x-8 px-8 pb-32">
+        <div class="character inactive" id="dinara">
+            <div class="relative">
+                <img src="https://i.ibb.co/93VNcvwG/Chat-GPT-Image-7-2025-11-46-01-Photoroom.png" alt="Dinara" class="h-96 object-contain">
+                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 py-1 px-3 text-center name-tag">
+                    <span class="text-green-400 font-bold">DINARA</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="character inactive" id="arina">
+            <div class="relative">
+                <img src="https://i.ibb.co/cKkg0nHW/Chat-GPT-Image-7-2025-11-38-16-Photoroom.png" alt="Arina" class="h-96 object-contain">
+                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 py-1 px-3 text-center name-tag">
+                    <span class="text-amber-400 font-bold">ARINA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Text Box -->
+    <div class="absolute bottom-0 left-0 right-0 text-box pixel-border mx-8 mb-8 p-4 text-shadow">
+        <div class="flex justify-between items-center mb-2">
+            <div class="name-tag px-4 py-1 text-sm font-bold" id="speaker-name">
+                <span class="text-gray-300">SYSTEM</span>
+            </div>
+            <div class="text-xs text-gray-500">
+                <span id="progress-indicator">1/15</span>
+            </div>
+        </div>
+        <div class="min-h-20">
+            <p class="text-lg leading-relaxed" id="dialogue-text"></p>
+        </div>
+        <div class="flex justify-end mt-2">
+            <button id="next-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-1 text-sm flex items-center">
+                NEXT <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Title Screen -->
+    <div id="title-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 z-50 transition-opacity duration-1000">
+        <div class="glitch mb-8" data-text="THE LAST CIGARETTE">
+            <h1 class="text-5xl md:text-7xl font-bold text-red-500 relative">THE LAST CIGARETTE</h1>
+        </div>
+        <p class="text-gray-400 mb-12 text-lg">A mystical investigation</p>
+        <button id="start-btn" class="pixel-border px-8 py-3 bg-gray-900 hover:bg-gray-800 text-gray-200 text-xl font-bold transition-all duration-300 hover:scale-105">
+            START INVESTIGATION
+        </button>
+        <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-gray-600">
+            <p>Visual style: Policenauts (1994) | Dialogue style: Chuck Palahniuk</p>
+        </div>
+    </div>
+    
+    <!-- Ending Screen -->
+    <div id="ending-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 z-50 opacity-0 pointer-events-none transition-opacity duration-1000">
+        <div class="text-center max-w-2xl px-8">
+            <h2 class="text-4xl font-bold text-amber-400 mb-6">CASE CLOSED</h2>
+            <p class="text-gray-300 mb-8 text-lg leading-relaxed">
+                The cigarette was never lost. It was always here, in the space between our fingers, 
+                in the time between breaths. The last drag is the first memory of smoke.
+            </p>
+            <div class="flex space-x-4 justify-center">
+                <button id="restart-btn" class="pixel-border px-6 py-2 bg-gray-900 hover:bg-gray-800 text-gray-200 font-bold">
+                    <i class="fas fa-redo mr-2"></i> REPLAY
+                </button>
+                <button id="quit-btn" class="pixel-border px-6 py-2 bg-gray-900 hover:bg-gray-800 text-gray-200 font-bold">
+                    <i class="fas fa-times mr-2"></i> QUIT
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const script = [
+            {
+                speaker: "SYSTEM",
+                text: "The ashtray holds only memories. The last cigarette vanished like a ghost in the machine.",
+                active: null
+            },
+            {
+                speaker: "DINARA",
+                text: "I saw it last night. Perched on the windowsill like a crow with glowing eyes. It whispered to me in smoke signals.",
+                active: "dinara"
+            },
+            {
+                speaker: "ARINA",
+                text: "Bullshit. Cigarettes don't whisper. They burn and die like everything else. But this one... this one left no ashes.",
+                active: "arina"
+            },
+            {
+                speaker: "DINARA",
+                text: "The cat followed its trail. Paw prints in nicotine stains leading to the wall where my paintings keep changing.",
+                active: "dinara"
+            },
+            {
+                speaker: "ARINA",
+                text: "Your bird paintings? The sparrows now have three eyes and the crows are smoking? Christ.",
+                active: "arina"
+            },
+            {
+                speaker: "DINARA",
+                text: "Not smoking. Breathing smoke. Reverse lungs. They're inhaling the last cigarette back into existence.",
+                active: "dinara"
+            },
+            {
+                speaker: "ARINA",
+                text: "We should check the bug collection. The moths have been restless since Tuesday. Like they know something.",
+                active: "arina"
+            },
+            {
+                speaker: "SYSTEM",
+                text: "The display case hums. Wings beat against glass in perfect Morse code: IT'S IN THE FILTER.",
+                active: null
+            },
+            {
+                speaker: "DINARA",
+                text: "The filter? That's where the poison collects. The cancer sleeps. The real cigarette was inside us all along.",
+                active: "dinara"
+            },
+            {
+                speaker: "ARINA",
+                text: "No. The filter is a time machine. Each drag takes you further from the moment of lighting it. The last one... the last one took you all the way.",
+                active: "arina"
+            },
+            {
+                speaker: "DINARA",
+                text: "To where?",
+                active: "dinara"
+            },
+            {
+                speaker: "ARINA",
+                text: "To the first cigarette ever smoked. The original sin of inhalation. We've been chasing its echo.",
+                active: "arina"
+            },
+            {
+                speaker: "SYSTEM",
+                text: "The ashtray rattles. A single feather floats down - half crow, half moth, all filter.",
+                active: null
+            },
+            {
+                speaker: "DINARA",
+                text: "It's beautiful. Like a painting that smokes itself into being.",
+                active: "dinara"
+            },
+            {
+                speaker: "ARINA",
+                text: "It's a goddamn Rorschach test. And we both see the same thing: the cigarette that was never there.",
+                active: "arina"
+            }
+        ];
+
+        // Game state
+        let currentLine = 0;
+        let isTyping = false;
+        let typingInterval;
+        
+        // DOM elements
+        const titleScreen = document.getElementById('title-screen');
+        const endingScreen = document.getElementById('ending-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const quitBtn = document.getElementById('quit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const speakerName = document.getElementById('speaker-name');
+        const dialogueText = document.getElementById('dialogue-text');
+        const progressIndicator = document.getElementById('progress-indicator');
+        const dinara = document.getElementById('dinara');
+        const arina = document.getElementById('arina');
+        
+        // Initialize
+        function init() {
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', restartGame);
+            quitBtn.addEventListener('click', quitGame);
+            nextBtn.addEventListener('click', advanceDialogue);
+            
+            // Preload character images
+            const preloadImages = [
+                'https://i.imgur.com/JQZqLQk.png',
+                'https://i.imgur.com/8vZz9Wk.png'
+            ];
+            
+            preloadImages.forEach(img => {
+                const image = new Image();
+                image.src = img;
+            });
+        }
+        
+        // Start game
+        function startGame() {
+            titleScreen.style.opacity = '0';
+            titleScreen.style.pointerEvents = 'none';
+            updateDialogue();
+        }
+        
+        // Restart game
+        function restartGame() {
+            endingScreen.style.opacity = '0';
+            endingScreen.style.pointerEvents = 'none';
+            currentLine = 0;
+            updateDialogue();
+        }
+        
+        // Quit game
+        function quitGame() {
+            endingScreen.style.opacity = '0';
+            endingScreen.style.pointerEvents = 'none';
+            titleScreen.style.opacity = '1';
+            titleScreen.style.pointerEvents = 'auto';
+            currentLine = 0;
+        }
+        
+        // Show ending
+        function showEnding() {
+            endingScreen.style.opacity = '1';
+            endingScreen.style.pointerEvents = 'auto';
+        }
+        
+        // Advance dialogue
+        function advanceDialogue() {
+            if (isTyping) {
+                // Skip typing animation
+                clearInterval(typingInterval);
+                isTyping = false;
+                dialogueText.innerHTML = script[currentLine].text;
+                return;
+            }
+            
+            currentLine++;
+            
+            if (currentLine >= script.length) {
+                showEnding();
+                return;
+            }
+            
+            updateDialogue();
+        }
+        
+        // Update dialogue
+        function updateDialogue() {
+            // Update progress
+            progressIndicator.textContent = `${currentLine + 1}/${script.length}`;
+            
+            // Update speaker
+            const currentScript = script[currentLine];
+            speakerName.innerHTML = currentScript.speaker === 'DINARA' 
+                ? '<span class="text-green-400">DINARA</span>' 
+                : currentScript.speaker === 'ARINA' 
+                    ? '<span class="text-amber-400">ARINA</span>' 
+                    : '<span class="text-gray-300">SYSTEM</span>';
+            
+            // Update active character
+            if (currentScript.active === 'dinara') {
+                dinara.classList.remove('inactive');
+                dinara.classList.add('active');
+                arina.classList.remove('active');
+                arina.classList.add('inactive');
+            } else if (currentScript.active === 'arina') {
+                arina.classList.remove('inactive');
+                arina.classList.add('active');
+                dinara.classList.remove('active');
+                dinara.classList.add('inactive');
+            } else {
+                dinara.classList.remove('active');
+                dinara.classList.add('inactive');
+                arina.classList.remove('active');
+                arina.classList.add('inactive');
+            }
+            
+            // Type out text
+            dialogueText.innerHTML = '';
+            isTyping = true;
+            let i = 0;
+            
+            typingInterval = setInterval(() => {
+                if (i < currentScript.text.length) {
+                    dialogueText.innerHTML += currentScript.text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typingInterval);
+                    isTyping = false;
+                }
+            }, 20);
+        }
+        
+        // Initialize game
+        window.onload = init;
+    </script>
+</body>
+</html>
